@@ -103,6 +103,17 @@ python3 tmp/retry_client.py
 - 客户端包含明确重试和超时配置
 - 形成异常分类处理表
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `python3 tmp/retry_client.py` | 打印模型回答文本和 `{'latencySeconds': ..., 'usage': ...}` |
+| 2 | `python3 -c "from botocore.config import Config; c=Config(retries={'max_attempts':5,'mode':'standard'}); print(c.retries)"` | 输出确认 `max_attempts=5`、`mode=standard` |
+
+## 实验总结
+
+本实验验证了生产级 Bedrock 客户端应具备的可靠性基础：查询 inference profile 了解跨区域推理能力、在 boto3 客户端配置显式重试和超时（而非依赖 SDK 默认值）、并对不同异常类型（限流可重试、校验类不可重试）形成分类处理表。这些配置是 Demo07 那类应用封装在真正上生产前必须补齐的健壮性细节。
+
 ## 清理
 
 ```bash

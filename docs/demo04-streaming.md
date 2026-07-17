@@ -116,6 +116,17 @@ jq -r '[.stream[]? | .contentBlockDelta.delta.text? // empty] | join("")' tmp/st
 - 能从事件流中拼接出完整文本
 - 能看到 messageStart、contentBlockDelta、messageStop 或 metadata 类事件
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `python3 tmp/stream_boto3.py 2>&1 \| grep "event types seen:"` | 输出包含 `contentBlockDelta` |
+| 2 | `python3 tmp/stream_boto3.py 2>&1 \| grep "concatenated text:"` | 输出非空文本 |
+
+## 实验总结
+
+本实验验证了 Bedrock 流式输出的事件结构（`messageStart` → 多个 `contentBlockDelta` → `contentBlockStop` → `messageStop`/`metadata`），并确认当前 AWS CLI 未暴露 `converse-stream` 子命令时，boto3 的 `converse_stream` 是可靠的替代路径。流式输出通过降低首字节等待时间显著改善聊天类 UI 的交互体验，是生产应用相比一次性返回更常用的调用方式。
+
 ## 清理
 
 ```bash

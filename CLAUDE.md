@@ -5,9 +5,9 @@ You have full terminal access. Follow these rules on every task.
 
 The demos build one running scenario: an internal enterprise policy assistant.
 
-- L100: call models and control input/output shape.
-- L200: wrap the model in an app, add logging, IAM, guardrails, and tool use.
-- L300: add RAG, Agents, reliability, evaluation, throughput, and cost governance.
+- Basic: call models and control input/output shape.
+- Intermediate: wrap the model in an app, add logging, IAM, guardrails, and tool use.
+- Production: add RAG, Agents, reliability, evaluation, throughput, and cost governance.
 
 Prefer keeping sample prompts inside this scenario unless a demo explicitly asks for another domain.
 

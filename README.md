@@ -13,11 +13,11 @@
 
 | 难度 | 目标 | 适合对象 |
 |------|------|----------|
-| L100 | 会调用模型并理解请求/响应结构 | 初次接触 Bedrock 的开发者 |
-| L200 | 能把模型接入应用并加上权限、日志、安全护栏 | 应用工程师、平台工程师 |
-| L300 | 能搭建 RAG / Agent / 评估 / 生产治理闭环 | 架构师、平台负责人、AI 应用负责人 |
+| 基础 | 会调用模型并理解请求/响应结构 | 初次接触 Bedrock 的开发者 |
+| 进阶 | 能把模型接入应用并加上权限、日志、安全护栏 | 应用工程师、平台工程师 |
+| 生产化 | 能搭建 RAG / Agent / 评估 / 生产治理闭环 | 架构师、平台负责人、AI 应用负责人 |
 
-## L100 基础：模型调用与输入输出
+## 基础：模型调用与输入输出
 
 ### 1. 基础环境
 
@@ -31,7 +31,7 @@
 - [Demo05 — 多模态输入：图片与文档理解](docs/demo05-multimodal-document.md)
 - [Demo06 — Prompt 模板与结构化 JSON 输出](docs/demo06-prompt-structured-output.md)
 
-## L200 应用化：封装、权限、安全与工具
+## 进阶：封装、权限、安全与工具
 
 ### 3. 最小应用与运行治理
 
@@ -45,7 +45,7 @@
 - [Demo11 — Guardrails 深入：Denied Topics、PII、Grounding 验证](docs/demo11-guardrails-advanced.md)
 - [Demo12 — Tool Use / Function Calling 工具调用](docs/demo12-tool-use.md)
 
-## L300 生产化：RAG、Agent、评估、吞吐与成本
+## 生产化：RAG、Agent、评估、吞吐与成本
 
 ### 5. RAG 与 Agent
 
@@ -67,7 +67,7 @@
 2. 将对应 [`docs/`](docs/) 目录中的 Demo 文件内容粘贴到对话框，由 AI 自主执行
 3. 每个 Demo 末尾均有**清理**步骤，实验结束后执行以避免持续计费
 
-> **当前状态**：本仓库是 Bedrock QuickStart 课程版骨架。L100/L200 Demo 以可直接执行的 CLI / Python 命令为主；L300 中涉及 Knowledge Bases、Agents、Batch、Prompt Caching、Inference Profile 等能力时，执行前必须先用当前 AWS CLI schema 和账号功能可用性确认参数，因为 Bedrock 模型访问、模型 ID、Region 支持、配额和功能开放状态会变化。
+> **当前状态**：本仓库是 Bedrock QuickStart 课程版骨架。基础/进阶 Demo 以可直接执行的 CLI / Python 命令为主；生产化部分涉及 Knowledge Bases、Agents、Batch、Prompt Caching、Inference Profile 等能力时，执行前必须先用当前 AWS CLI schema 和账号功能可用性确认参数，因为 Bedrock 模型访问、模型 ID、Region 支持、配额和功能开放状态会变化。
 
 ---
 

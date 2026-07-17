@@ -120,6 +120,17 @@ aws logs start-query \
 - CloudWatch Logs 中能查到近期 Bedrock invocation 记录
 - 日志中不得包含真实敏感数据
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `aws bedrock get-model-invocation-logging-configuration --region ${AWS_REGION} --query 'loggingConfig.cloudWatchConfig.logGroupName' --output text` | `${BEDROCK_LOG_GROUP}` |
+| 2 | `aws logs start-query --log-group-name "${BEDROCK_LOG_GROUP}" --start-time $(date -u -d '15 minutes ago' +%s) --end-time $(date -u +%s) --query-string 'fields @message \| filter @message like /demo06/' --region ${AWS_REGION}` | 返回的 query 结果中能找到本次调用的 `requestMetadata` |
+
+## 实验总结
+
+本实验打通了 Bedrock 模型调用的审计闭环：开启 CloudWatch Logs 调用日志后，请求/响应元数据（含自定义 `requestMetadata`）可在 CloudWatch Logs Insights 中检索，为生产环境的调用审计、异常排查和使用量分析提供了基础设施。需要注意日志内容可能包含用户输入原文，涉及敏感信息的场景应评估是否需要脱敏或关闭 `textDataDeliveryEnabled`。
+
 ## 清理
 
 如后续不再需要调用日志：

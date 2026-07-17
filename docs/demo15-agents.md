@@ -321,6 +321,14 @@ python3 tmp/agent_invoke.py
 - Agent runtime 调用触发 Lambda
 - 最终回答包含预算状态和清理建议
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `python3 tmp/agent_invoke.py 2>&1 \| grep "lambda action-group trace evidence count:"` | 数字大于 `0` |
+| 2 | `aws logs filter-log-events --log-group-name /aws/lambda/${TOOL_FUNCTION_NAME} --region ${AWS_REGION} --query 'events[-1].message' --output text` | 能查到近期一条调用记录，时间戳落在本次 invoke 窗口内 |
+| 3 | `python3 tmp/agent_invoke.py 2>&1 \| grep "final text:"` | 输出中包含预算状态与清理建议 |
+
 ## 常见失败与处理
 
 | 现象 | 原因 | 处理 |
@@ -330,6 +338,10 @@ python3 tmp/agent_invoke.py
 | Agent prepare 失败 | role 权限不足 | 检查 `bedrock:InvokeModel` 和 `lambda:InvokeFunction` |
 | invoke-agent 输出难解析 | event stream 格式 | 保存原始 JSON，按 `chunk.bytes` 或 trace 字段解析 |
 | CLI 无 `invoke-agent` 子命令 | Agent Runtime CLI schema 未暴露该命令 | 改用 boto3 `bedrock-agent-runtime` 客户端的 `invoke_agent`，迭代返回的 `EventStream` |
+
+## 实验总结
+
+本实验创建了一个最小 Bedrock Agent，验证了 Agent 判断调用工具、触发 Lambda Action Group、把工具结果整合进最终回答的完整调用链。整条链路依赖两层授权拼接：Agent 执行角色允许它调用模型和 Lambda，Lambda 的 resource policy 反过来允许 Bedrock 服务调用它。用 `trace` 事件确认 Lambda 被真正触发（而非模型编造答案），是验证 Agent 应用正确性的关键手段，也是本系列中最接近生产级 Agent 应用架构的 Demo。
 
 ## 清理
 

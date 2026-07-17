@@ -95,6 +95,17 @@ jq '.trace // empty' tmp/guardrail-output.json
 - Converse 响应应用了 guardrailConfig
 - PII 测试样例被匿名化或触发 trace 记录
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `aws bedrock get-guardrail --guardrail-identifier ${GUARDRAIL_ID} --guardrail-version ${GUARDRAIL_VERSION} --region ${AWS_REGION} --query 'status' --output text` | `READY` |
+| 2 | `jq -e '.trace.guardrail // empty \| length > 0' tmp/guardrail-output.json` | `true`（trace 中记录了 sensitiveInformationPolicy 处理过程） |
+
+## 实验总结
+
+本实验创建了一个最小 Guardrail，并验证了内容策略过滤（仇恨/暴力/不当行为）与敏感信息匿名化（邮箱/电话）两类防护在同一次 Converse 调用中同时生效。Guardrail 独立于具体模型版本存在、可在多个请求间复用，是把安全护栏从"prompt 里的口头约束"升级为"服务层强制拦截"的关键组件，也是 Demo11 深化场景的基础。
+
 ## 清理
 
 ```bash

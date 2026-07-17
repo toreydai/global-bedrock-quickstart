@@ -102,6 +102,17 @@ aws iam get-policy-version \
 - Resource 限定到指定 foundation model ARN
 - Role trust principal 与实际计算环境一致
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `aws iam simulate-principal-policy --policy-source-arn arn:${AWS_PARTITION}:iam::${ACCOUNT_ID}:role/${APP_ROLE_NAME} --action-names bedrock:InvokeModel --resource-arns arn:${AWS_PARTITION}:bedrock:${AWS_REGION}::foundation-model/${BEDROCK_TEXT_MODEL_ID} --query 'EvaluationResults[0].EvalDecision' --output text` | `allowed` |
+| 2 | `aws iam simulate-principal-policy --policy-source-arn arn:${AWS_PARTITION}:iam::${ACCOUNT_ID}:role/${APP_ROLE_NAME} --action-names bedrock:InvokeModel --resource-arns 'arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0' --query 'EvaluationResults[0].EvalDecision' --output text` | `implicitDeny`（假设该模型不是授权的 `BEDROCK_TEXT_MODEL_ID`） |
+
+## 实验总结
+
+本实验验证了 Bedrock Runtime 最小权限的正确实现方式——`bedrock:InvokeModel`/`InvokeModelWithResponseStream` 的 `Resource` 可以精确限定到具体 foundation model ARN，而不是笼统授予 `*`。这种粒度的权限收敛是生产环境部署 Bedrock 应用前的必要步骤，也是 Demo07 应用封装中 Lambda 执行角色权限设计所依据的模式。
+
 ## 清理
 
 ```bash

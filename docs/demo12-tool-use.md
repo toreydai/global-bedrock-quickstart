@@ -148,6 +148,17 @@ jq -r '.output.message.content[]?.text' tmp/tool-step2-output.json
 - 第二次响应能引用工具返回的预算状态
 - 模型没有伪造未提供的预算数据
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `jq -e '.output.message.content[] \| select(.toolUse) \| .toolUse.name == "get_budget_status"' tmp/tool-step1-output.json` | `true` |
+| 2 | `jq -r '.output.message.content[]?.text' tmp/tool-step2-output.json \| grep -E "7.25\|OK"` | 输出中包含工具回传的预算数值或状态 |
+
+## 实验总结
+
+本实验验证了 Converse API tool use 的完整闭环：模型判断需要调用工具并返回结构化 `toolUse` 请求，客户端执行工具逻辑后把 `toolResult` 回传，模型基于真实工具结果生成最终回答，且没有凭空编造未提供的数据。这是构建"轻量级工具增强问答"应用（区别于 Demo15 完整 Agent）的最小可行模式，也是理解 Demo15 Action Group 底层机制的基础。
+
 ## 清理
 
 ```bash

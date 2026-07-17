@@ -313,6 +313,15 @@ jq '.citations' tmp/retrieve-generate-output.json
 - 回答能基于政策文档拒绝外部工具上传
 - citations 中能看到 S3 文档来源
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `aws opensearchserverless batch-get-collection --ids ${AOSS_COLLECTION_ID} --region ${AWS_REGION} --query 'collectionDetails[0].status' --output text` | `ACTIVE` |
+| 2 | `aws bedrock-agent get-knowledge-base --knowledge-base-id ${KNOWLEDGE_BASE_ID} --region ${AWS_REGION} --query 'knowledgeBase.status' --output text` | `ACTIVE` |
+| 3 | `aws bedrock-agent get-ingestion-job --knowledge-base-id ${KNOWLEDGE_BASE_ID} --data-source-id ${DATA_SOURCE_ID} --ingestion-job-id ${INGESTION_JOB_ID} --region ${AWS_REGION} --query 'ingestionJob.status' --output text` | `COMPLETE` |
+| 4 | `jq '.citations \| length' tmp/retrieve-generate-output.json` | 大于 `0` |
+
 ## 常见失败与处理
 
 | 现象 | 原因 | 处理 |
@@ -321,6 +330,10 @@ jq '.citations' tmp/retrieve-generate-output.json
 | Ingestion 失败 | service role 不能读 S3 或调用 embedding model | 检查 IAM inline policy 和 bucket prefix |
 | retrieve 无结果 | 文档未同步或 index 为空 | 查看 ingestion job failure reasons |
 | 持续计费 | AOSS collection 未删除 | 清理时必须删除 collection 和 policies |
+
+## 实验总结
+
+本实验搭建了一条最小但完整的 RAG 链路：S3 文档经 Knowledge Base 的 Data Source 分块并调用 Embedding 模型生成向量，写入 OpenSearch Serverless 索引，`retrieve-and-generate` 先做向量检索再交给文本模型生成带 citation 的回答。验证结果显示模型能正确依据私有政策文档拒绝"客户合同发外部工具"这类违规请求，citation 机制让回答可追溯到具体源文档，是企业级 RAG 应用满足合规审计要求的关键能力，也是 Demo14 深化功能（metadata filter、rerank）的基础。
 
 ## 清理
 

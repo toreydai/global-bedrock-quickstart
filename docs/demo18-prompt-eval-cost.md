@@ -115,6 +115,17 @@ aws lambda list-functions --region ${AWS_REGION} --query "Functions[?contains(Fu
 - 列出当前仍会持续计费的资源
 - 明确哪些资源已清理、哪些保留给后续实验
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `aws s3 ls s3://${BEDROCK_BUCKET}/eval/eval-set.jsonl` | 返回文件列表，非空 |
+| 2 | `jq -s '{cases: length, totalTokens: ((map(.usage.inputTokens)\|add)+(map(.usage.outputTokens)\|add))}' tmp/eval-results.jsonl` | `cases` 等于评估集条数（4），`totalTokens` 大于 `0` |
+
+## 实验总结
+
+本实验是整个 QuickStart 系列的收尾：把前面各 Demo 中零散的临时 prompt 收敛为可管理的评估资产，跑通一次最小离线评估并汇总 token 成本，同时对全账号做了一轮 Bedrock 相关资源盘点。评估中 `q3`（客户合同能否发外部翻译工具）在仅有 system prompt 约束、未接入 Guardrails/RAG 时给出了错误答案，这恰好印证了 Demo10/11 Guardrails 和 Demo13/14 RAG 检索的必要性——单靠 prompt 工程无法保证策略合规。清理审计环节则确保 OpenSearch Serverless、Provisioned Throughput 等易被遗忘的持续计费资源不会在实验结束后继续产生费用。
+
 ## 清理
 
 ```bash

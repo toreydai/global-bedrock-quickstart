@@ -114,6 +114,13 @@ aws bedrock-runtime converse \
 - email / phone 被匿名化，AWS access key 类型输入被阻断
 - grounding 测试形成可复用的评估样例
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `jq '.trace.guardrail // empty' tmp/advanced-denied-topic-output.json` | 非空，显示 `topicPolicy` 拦截命中 `ExternalSecretSharing` |
+| 2 | `jq -r '.output.message.content[]?.text' tmp/advanced-pii-output.json` | 邮箱和电话号码被替换为占位符（如 `{EMAIL}`/`{PHONE}`），未原样出现 |
+
 ## 常见失败与处理
 
 | 现象 | 原因 | 处理 |
@@ -121,6 +128,10 @@ aws bedrock-runtime converse \
 | Denied topic 未触发 | topic definition 太窄 | 增加 examples，调高策略强度 |
 | PII 未匿名化 | 实体类型未覆盖 | 增加 `piiEntitiesConfig` |
 | 回答仍然猜测 | Guardrail 不能替代 RAG citation 校验 | 在应用层强制检查 citations |
+
+## 实验总结
+
+本实验在 Demo10 基础上把 Guardrail 从"通用内容过滤"深化到"业务定制策略"：用 `topicPolicyConfig` 定义了一个专属的禁止主题（把机密信息发给外部工具），验证了自定义 denied topic 能够拦截业务特定的违规请求；同时确认了 PII 匿名化和 AWS access key 阻断可以在同一 Guardrail 中叠加生效。Grounding 测试样例进一步说明：Guardrail 负责"拦截不该说的"，但"确保答案有依据"仍需应用层结合 RAG citation 校验（Demo13/14），两者是互补而非替代关系。
 
 ## 清理
 

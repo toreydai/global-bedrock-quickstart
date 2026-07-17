@@ -54,7 +54,7 @@ cat > tmp/converse-text.json <<'EOF'
 EOF
 ```
 
-> **已知限制/复测结论：** 早期一次执行怀疑当前 AWS CLI 在 `--cli-input-json` 请求体中处理非 ASCII（中文）文本会报错，曾临时改用英文样例规避。后续用真实账号复测：只要像上一步一样用**带引号的 heredoc**（`cat > file <<'EOF' ... EOF`）把请求体写成 UTF-8 文件，再通过 `--cli-input-json file://...` 引用，AWS CLI v2.33.x 和 v2.34.x（含 Python 3.9 和 3.14 两种运行时）在 `LANG=C.UTF-8`、`LANG=C` 甚至强制 ASCII locale 下都能正确处理中文请求体，未复现编码错误。因此本步骤保留中文示例 prompt。真正的风险点在于**不要把 JSON 直接拼进命令行参数**（例如 `--cli-input-json "$(cat file)"`）或使用不带引号的 heredoc（`<<EOF`，会做 shell 变量展开），这类写法在部分 shell/locale 组合下更容易把多字节字符处理错误；请始终使用本文档展示的“带引号 heredoc 写文件 + `file://` 引用”模式。
+> **注意：** 用带引号的 heredoc（`cat > file <<'EOF'`）把请求体写成 UTF-8 文件，再通过 `--cli-input-json file://...` 引用，AWS CLI 能正确处理中文请求体。不要把 JSON 直接拼进命令行参数，也不要用不带引号的 heredoc（`<<EOF` 会做 shell 变量展开），这类写法更容易把多字节字符处理错误。
 
 ### 2. 调用 Converse API
 
@@ -88,6 +88,10 @@ jq '{stopReason,usage,metrics}' tmp/converse-text-output.json
 |---|----------|----------|
 | 1 | `jq -r '.output.message.role' tmp/converse-text-output.json` | `assistant` |
 | 2 | `jq -e '.usage.inputTokens > 0 and .usage.outputTokens > 0' tmp/converse-text-output.json` | `true` |
+
+## 实验总结
+
+本实验完成了对 Bedrock Runtime Converse API 的首次调用，验证了标准 `messages` 请求结构、`inferenceConfig` 推理参数和响应中 `usage`/`stopReason` 字段的含义。Converse API 是本系列几乎所有后续 Demo（多轮对话、流式、工具调用、Agent）共用的统一调用接口，这里建立的请求/解析模式会被反复复用。
 
 ## 清理
 

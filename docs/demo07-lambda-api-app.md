@@ -171,6 +171,14 @@ aws lambda create-function-url-config \
 - 空问题返回 400
 - Lambda execution role 只允许调用指定模型
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `cat tmp/lambda-response.json \| jq -r '.statusCode'` | `200` |
+| 2 | `cat tmp/lambda-response.json \| jq -r '.body' \| jq -e '.answer and .usage'` | `true` |
+| 3 | `aws iam get-role-policy --role-name ${APP_NAME}-role --policy-name ${APP_NAME}-policy --query 'PolicyDocument.Statement[?Action==`bedrock:InvokeModel`].Resource' --output text` | 输出为具体模型 ARN，不是 `*` |
+
 ## 常见失败与处理
 
 | 现象 | 原因 | 处理 |
@@ -178,6 +186,10 @@ aws lambda create-function-url-config \
 | Lambda `AccessDeniedException` | execution role 缺少模型 ARN 权限 | 检查 policy 中模型 ID 和 Region |
 | Lambda import boto3 失败 | runtime 异常或打包问题 | 使用 Lambda Python runtime 自带 boto3 或打包依赖 |
 | Lambda timeout | 模型响应慢或 timeout 太低 | timeout 提高到 30-60 秒，应用侧设置重试策略 |
+
+## 实验总结
+
+本实验把 Demo02 的 Converse API 调用封装成一个端到端 HTTP 应用：API Gateway/Function URL 接收请求、Lambda 调用 Bedrock、返回结构化 JSON，并验证了空输入校验、异常兜底和最小权限执行角色（Resource 限定到具体模型 ARN）。这是本系列中唯一一个演示"如何把 Bedrock 能力包装成可对外提供服务的应用"的 Demo，为 Demo08 的调用日志和 Demo09 的 IAM 权限收敛提供了被测对象。
 
 ## 清理
 

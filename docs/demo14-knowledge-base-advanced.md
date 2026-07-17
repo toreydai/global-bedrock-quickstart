@@ -108,6 +108,17 @@ jq -e '[.citations[]?.retrievedReferences[]?] | length > 0' tmp/retrieve-generat
 - 无 citation 的回答被应用侧拒绝
 - 如执行 rerank，记录 top result 顺序变化和延迟变化
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `jq -e '[.retrievalResults[]?.metadata.department] \| all(. == "legal")' tmp/kb-filter-retrieve-output.json` | `true` |
+| 2 | `jq -e '.citations \| length > 0' tmp/retrieve-generate-output.json` | `true` |
+
+## 实验总结
+
+本实验在 Demo13 最小 RAG 基础上补齐了生产环境的常见需求：用 `metadata filter` 把检索范围收窄到指定部门，验证了过滤后的结果不会跨部门泄露；同时在应用侧强制要求 citation 非空，没有引用来源的回答不直接展示给用户，而是明确告知"资料不足"。这一组约束是把 Demo13 的 RAG Demo 升级为可用于企业内部合规场景的关键一步。
+
 ## 清理
 
 本 Demo 通常复用 Demo13 资源。只删除新增对象：

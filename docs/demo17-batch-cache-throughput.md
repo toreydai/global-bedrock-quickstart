@@ -105,6 +105,17 @@ aws bedrock get-model-invocation-job \
 - 输出结果可从 S3 下载并解析
 - prompt caching 形成适用/不适用判断
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `aws s3 ls s3://${BEDROCK_BUCKET}/batch/input/batch-input.jsonl` | 返回文件列表，非空 |
+| 2 | `aws bedrock get-model-invocation-job --job-identifier ${BATCH_JOB_NAME} --region ${AWS_REGION} --query 'status' --output text` | `Completed`（或已记录当前账号/模型不支持的明确原因） |
+
+## 实验总结
+
+本实验对比了实时调用、streaming、batch inference、prompt caching 和 provisioned throughput 五种推理模式的适用场景，并实际跑通了一次 batch inference 任务（离线批量风险分类）。这类决策表是把 Bedrock 应用从"能跑通单次调用"推进到"针对不同流量特征选择合适吞吐/成本方案"的关键一步，是 Demo18 成本审计的前置输入。
+
 ## 清理
 
 ```bash

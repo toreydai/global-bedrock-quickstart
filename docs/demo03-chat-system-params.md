@@ -108,6 +108,18 @@ aws bedrock-runtime converse \
 - 低温度输出更稳定、结构更一致
 - 输出 JSON 中 usage 字段完整
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `jq -e '.usage.inputTokens > 0 and .usage.outputTokens > 0' tmp/chat-turn2-output.json` | `true` |
+| 2 | `jq -r '.output.message.content[]?.text' tmp/chat-turn2-output.json` | 输出内容延续第一轮列出的组件并给出排序 |
+| 3 | 对比 `tmp/chat-turn2-output.json` 与 `tmp/chat-turn2-hot-output.json` 的文本内容 | 高温度（0.9）输出用词/结构与低温度（0.1）明显不同 |
+
+## 实验总结
+
+本实验验证了 Bedrock Converse API 本身无状态：多轮对话的上下文必须由客户端显式在 `messages` 数组中维护并逐轮回传，服务端不会自动记住历史。通过对比低温度与高温度在同一 system prompt 下的输出差异，也直观感受到 `temperature` 参数对确定性与创造性的权衡，为后续 Demo 中根据场景选择推理参数提供了依据。
+
 ## 清理
 
 ```bash

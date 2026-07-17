@@ -109,6 +109,10 @@ EOF
 | 2 | `aws logs describe-log-groups --log-group-name-prefix ${BEDROCK_LOG_GROUP}` | 返回目标日志组 |
 | 3 | `test -n "${BEDROCK_TEXT_MODEL_ID}" && echo ok` | `ok` |
 
+## 实验总结
+
+本实验搭建了整个 QuickStart 系列复用的基础设施：统一的 S3 桶、调用日志组，以及经过枚举确认的可用模型 ID（文本/视觉/embedding）。后续所有 Demo 都依赖这里导出的 `BEDROCK_TEXT_MODEL_ID` 等环境变量，模型访问权限和 Region 选择上的任何偏差都会在这一步先暴露出来，避免在后面的 Demo 中才发现基础环境问题。
+
 ## 清理
 
 如果只执行 Demo01 且不继续后续实验：

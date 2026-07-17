@@ -90,6 +90,13 @@ jq -e '.risk_level == "low" or .risk_level == "medium" or .risk_level == "high"'
 - `risk_level` 落在枚举范围内
 - 失败路径测试能说明 prompt 约束对应用稳定性的影响
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `jq -e '.intent and .risk_level and .answer_style and (.follow_up_needed\|type=="boolean")' tmp/structured-text.json` | `true` |
+| 2 | `jq -r '.risk_level' tmp/structured-text.json` | `low`、`medium` 或 `high` 三者之一 |
+
 ## 常见失败与处理
 
 | 现象 | 原因 | 处理 |
@@ -97,6 +104,10 @@ jq -e '.risk_level == "low" or .risk_level == "medium" or .risk_level == "high"'
 | 输出包含 Markdown fenced block | prompt 约束不足 | 强化 system prompt，应用侧去除代码块后再解析 |
 | `jq` 解析失败 | 模型返回自然语言 | 降低 temperature，加入字段示例 |
 | 字段缺失 | schema 描述不够明确 | 把字段和枚举写进 system prompt |
+
+## 实验总结
+
+本实验把自由文本问答收敛为可解析的结构化 JSON 输出，验证了 `temperature=0` + 明确 schema 约束下模型输出的稳定性；同时通过对比"去掉强约束"的失败路径，证明了 prompt 工程本身无法 100% 保证格式正确，应用侧仍需具备 JSON 解析容错能力。这里建立的结构化输出模式是后续 Demo10/11 Guardrails 校验和 Demo18 评估打分的基础。
 
 ## 清理
 

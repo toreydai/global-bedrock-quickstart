@@ -104,6 +104,17 @@ jq -n --arg img "${IMAGE_B64}" --arg fmt "${IMAGE_FORMAT}" '{
 - 响应能正确识别文档中的目标和负责人
 - 如执行图片选做，模型能描述图片内容
 
+## 验证检查点
+
+| # | 检查命令 | 期望输出 |
+|---|----------|----------|
+| 1 | `jq -r '.output.message.content[]?.text' tmp/document-output.json \| grep -c .` | 大于 `0` |
+| 2 | `jq -r '.output.message.content[]?.text' tmp/document-output.json` | 输出中包含文档里的目标和负责人信息 |
+
+## 实验总结
+
+本实验验证了 Converse API 处理 `document` 类型多模态输入的方式——文档以 `bytes` 字段的 base64 编码传入，模型能正确从短文档中提取结构化信息并按要求返回 JSON；图片输入走的是同一 `content` 数组扩展的模式（`image` 块）。这为后续需要处理截图、合同、报告等非纯文本输入的应用场景提供了最小可行的输入格式基础。
+
 ## 清理
 
 ```bash
